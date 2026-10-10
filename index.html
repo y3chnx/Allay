@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Allay Motifs — Allamein Music Tutor</title>
+<style>
+    :root {
+        color-scheme: dark;
+        --brand-green: #00ff0d;
+        --bg: #07090b;
+        --panel: rgb(25,25,25);
+        --panel-border: rgb(0,155,13);
+        --text: #f7f8f5;
+        --muted: #99a18a;
+        --danger: #ff4d4d;
+        --success: #3ae27a;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { margin: 0; min-height: 100vh; }
+
+    body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Segoe UI", Roboto, Arial, sans-serif;
+        position: relative;
+        padding: 90px 18px 32px;
+        display: flex;
+        justify-content: center;
+    }
+
+    /* fixed top-left logo */
+    .topbar img {
+        width: 140px;
+        max-width: 160px;
+        object-fit: contain;
+        display: block;
+        left: 20px;
+        position: fixed;
+        top: 20px;
+    }
+
+    /* Centered page title (Allay Motifs) */
+    .header-text {
+        display: flex;
+        justify-content: center;
+        padding-top: 10px;
+        width: 100%;
+        position: fixed;
+        top: 28px;
+        left: 0;
+        pointer-events: none;
+    }
+
+    .title {
+color: #ffffff;
+            font-family: "Segoe UI", Arial, sans-serif;
+            font-size: 300%;
+            text-align: center;
+            margin: 0;
+    }
+
+    .page-body {
+        width: min(900px, 100%);
+        display: grid;
+        gap: 20px;
+        margin-top: 8vh;
+    }
+
+    /* Main card */
+    .card {
+        padding: 28px;
+        border-radius: 20px;
+        border: 1px solid var(--panel-border);
+        background: linear-gradient(180deg, rgba(12,16,21,0.9), rgba(8,10,12,0.85));
+        box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+        display: grid;
+        grid-template-columns: 1fr 420px;
+        gap: 20px;
+        align-items: start;
+    }
+
+    .controls { display: grid; gap: 16px; }
+
+    .controls h2 {
+        margin: 0;
+        color: var(--brand-green);
+        font-size: 1.25rem;
+        font-weight: 700;
+    }
+
+    .control-row { display:flex; gap:12px; align-items:center; }
+
+    .control-row label {
+        min-width: 160px;
+        color: var(--muted);
+        font-weight: 700;
+        font-size: 0.98rem;
+    }
+
+    .control { flex:1; display:flex; gap:10px; align-items:center; }
+
+    select, input[type="number"], .badge {
+        background: rgba(12,16,21,0.9);
+        border: 1px solid rgba(255,255,255,0.06);
+        color: var(--text);
+        padding: 12px 14px;
+        border-radius: 12px;
+        font-size: 0.98rem;
+        min-width: 110px;
+        text-align: center;
+        font-weight: 700;
+    }
+
+    input[type="range"] {
+        -webkit-appearance:none;
+        appearance:none;
+        height: 10px;
+        background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+        border-radius: 8px;
+        width: 100%;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance:none;
+        appearance:none;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: var(--brand-green);
+        box-shadow: 0 6px 18px rgba(0,255,13,0.12);
+        border: 2px solid rgba(0,0,0,0.6);
+        cursor: pointer;
+    }
+
+    .badge {
+        min-width: 64px;
+        text-align: center;
+        font-weight: 800;
+        color: var(--text);
+        background: rgba(255,255,255,0.02);
+        border-radius: 10px;
+        padding: 8px 10px;
+    }
+
+    .output-panel {
+        border-radius: 16px;
+        padding: 18px;
+        background: linear-gradient(180deg, rgba(8,10,12,0.9), rgba(6,7,8,0.85));
+        border: 1px solid rgba(255,255,255,0.04);
+        min-height: 420px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .output-area {
+        flex: 1;
+        border-radius: 12px;
+        background: #090b0f;
+        border: 2px dashed rgba(0,155,13,0.12);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 18px;
+        color: var(--muted);
+        text-align: center;
+        font-size: 0.98rem;
+    }
+
+    .controls-footer { display:flex; gap:12px; justify-content:flex-end; margin-top: 6px; }
+
+    .btn {
+        min-width: 120px;
+        padding: 12px 18px;
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.06);
+        background: var(--brand-green);
+        color: #050607;
+        font-weight: 800;
+        cursor: pointer;
+    }
+
+    .btn.ghost {
+        background: transparent;
+        color: var(--text);
+        border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .meta { display:flex; justify-content:space-between; color: var(--muted); font-weight:700; font-size: 0.95rem; }
+
+    @media (max-width: 980px) {
+        body { padding-top: 110px; }
+        .card { grid-template-columns: 1fr; }
+        .topbar img { width: 112px; left: 12px; top: 14px; }
+        .header-text { top: 18px; }
+        .title { font-size: 2.1rem; }
+    }
+</style>
+</head>
+<body>
+    <!-- fixed logo top-left -->
+    <div class="topbar" aria-hidden="true">
+        <img src="https://i.imgur.com/HvQ6wZ6.png" alt="Allamein Studios logo">
+    </div>
+
+    <!-- centered page title -->
+    <div class="header-text" aria-hidden="false">
+        <h1 class="title">Allay Motifs</h1>
+    </div>
+
+    <div class="page-body" role="main">
+        <div class="card" aria-label="Allamein controls and output slot">
+            <!-- Controls column -->
+            <div class="controls" aria-label="controls">
+                <h2>Controls</h2>
+
+                <div class="control-row">
+                    <label for="bpmRange"><strong>BPM</strong></label>
+                    <div class="control">
+                        <input id="bpmRange" type="range" min="30" max="240" value="120" aria-label="BPM slider">
+                        <input id="bpmNumber" type="number" min="30" max="240" value="120" aria-label="BPM number" style="width:110px; padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,0.06); background:rgba(12,16,21,0.9); color:var(--text); font-weight:700;">
+                    </div>
+                </div>
+
+                <div class="control-row">
+                    <label for="timeSig" style="color:var(--brand-green)"><strong>Time Signature</strong></label>
+                    <div class="control">
+                        <select id="timeSig" class="time-signature" aria-label="time signature">
+                            <option value="4/4">4 / 4</option>
+                            <option value="3/4">3 / 4</option>
+                            <option value="2/4">2 / 4</option>
+                            <option value="6/8">6 / 8</option>
+                        </select>
+                        <div class="badge" aria-hidden="true">beats</div>
+                    </div>
+                </div>
+
+                <div class="control-row">
+                    <label for="keySig"><strong>Key Signature</strong></label>
+                    <div class="control">
+                        <select id="keySig" aria-label="key signature">
+                            <option value="C">C major / a minor</option>
+                            <option value="G">G major / e minor</option>
+                            <option value="D">D major / b minor</option>
+                            <option value="A">A major / f# minor</option>
+                            <option value="E">E major / c# minor</option>
+                            <option value="F">F major / d minor</option>
+                            <option value="Bb">B♭ major / g minor</option>
+                            <option value="Eb">E♭ major / c minor</option>
+                        </select>
+                        <div class="badge" aria-hidden="true">tonality</div>
+                    </div>
+                </div>
+
+                <div class="control-row">
+                    <label for="variability"><strong>Variability</strong></label>
+                    <div class="control">
+                        <input id="variability" type="range" min="0" max="100" value="30" aria-label="variability slider">
+                        <div class="badge" id="varVal">30</div>
+                    </div>
+                </div>
+
+                <div class="control-row">
+                    <label for="complexity"><strong>Complexity</strong></label>
+                    <div class="control">
+                        <input id="complexity" type="range" min="0" max="100" value="40" aria-label="complexity slider">
+                        <div class="badge" id="compVal">40</div>
+                    </div>
+                </div>
+
+                <div class="control-row">
+                    <label for="density"><strong>Note Density</strong></label>
+                    <div class="control">
+                        <input id="density" type="range" min="0" max="100" value="50" aria-label="note density slider">
+                        <div class="badge" id="densVal">50</div>
+                    </div>
+                </div>
+
+                <div class="controls-footer" aria-hidden="true">
+                    <button id="clear" class="btn ghost" type="button">Clear</button>
+                    <button id="apply" class="btn" type="button">Apply</button>
+                </div>
+
+                <div class="meta" aria-hidden="true">
+                    <div id="currentSelection">4 / 4 • C • 120 BPM</div>
+                    <div></div>
+                </div>
+            </div>
+
+            <!-- Output column -->
+            <div class="output-panel" aria-label="output area">
+                <div class="output-area" id="outputArea" aria-live="polite" aria-atomic="true">
+                    Output area reserved for external renderings (notation, visualizers, audio controls, etc.). This frontend does not generate outputs itself.
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div style="color:var(--muted); font-weight:700;">Open output slot</div>
+                    <div style="color:var(--muted); font-weight:700;" id="patternInfo">4 / 4 • C • 120 BPM</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    // Sync BPM slider and number
+    const bpmRange = document.getElementById('bpmRange');
+    const bpmNumber = document.getElementById('bpmNumber');
+    const timeSig = document.getElementById('timeSig');
+    const keySig = document.getElementById('keySig');
+    const variability = document.getElementById('variability');
+    const varVal = document.getElementById('varVal');
+    const complexity = document.getElementById('complexity');
+    const compVal = document.getElementById('compVal');
+    const density = document.getElementById('density');
+    const densVal = document.getElementById('densVal');
+    const apply = document.getElementById('apply');
+    const clear = document.getElementById('clear');
+    const patternInfo = document.getElementById('patternInfo');
+    const currentSelection = document.getElementById('currentSelection');
+
+    function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
+
+    bpmRange.addEventListener('input', () => {
+        bpmNumber.value = bpmRange.value;
+        updatePatternInfo();
+    });
+
+    bpmNumber.addEventListener('input', () => {
+        const v = clamp(parseInt(bpmNumber.value || 0, 10), 30, 240);
+        bpmNumber.value = v;
+        bpmRange.value = v;
+        updatePatternInfo();
+    });
+
+    variability.addEventListener('input', () => { varVal.textContent = variability.value; });
+    complexity.addEventListener('input', () => { compVal.textContent = complexity.value; });
+    density.addEventListener('input', () => { densVal.textContent = density.value; });
+
+    function updatePatternInfo() {
+        const txt = `${timeSig.value} • ${keySig.value} • ${bpmRange.value} BPM`;
+        patternInfo.textContent = txt;
+        currentSelection.textContent = txt;
+    }
+
+    timeSig.addEventListener('change', updatePatternInfo);
+    keySig.addEventListener('change', updatePatternInfo);
+
+    // Initialize
+    varVal.textContent = variability.value;
+    compVal.textContent = complexity.value;
+    densVal.textContent = density.value;
+    bpmNumber.value = bpmRange.value;
+    updatePatternInfo();
+
+    // Apply and Clear hooks (no output generation)
+    apply.addEventListener('click', () => {
+        const payload = {
+            bpm: parseInt(bpmRange.value, 10),
+            timeSignature: timeSig.value,
+            keySignature: keySig.value,
+            variability: parseInt(variability.value, 10),
+            complexity: parseInt(complexity.value, 10),
+            density: parseInt(density.value, 10)
+        };
+        window.dispatchEvent(new CustomEvent('controlsApplied', { detail: payload }));
+        updatePatternInfo();
+    });
+
+    clear.addEventListener('click', () => {
+        bpmRange.value = 120;
+        bpmNumber.value = 120;
+        timeSig.value = '4/4';
+        keySig.value = 'C';
+        variability.value = 30; varVal.textContent = 30;
+        complexity.value = 40; compVal.textContent = 40;
+        density.value = 50; densVal.textContent = 50;
+        updatePatternInfo();
+        window.dispatchEvent(new CustomEvent('controlsCleared'));
+    });
+
+    // Small API for integrators to populate the output area
+    window.AllameinFrontend = {
+        setOutputElement(node) {
+            const out = document.getElementById('outputArea');
+            if (!out) return;
+            out.innerHTML = '';
+            out.appendChild(node);
+        },
+        clearOutput() {
+            const out = document.getElementById('outputArea');
+            if (!out) return;
+            out.innerHTML = 'Output area reserved for external renderings (notation, visualizers, audio controls, etc.).';
+        }
+    };
+</script>
+</body>
+</html>
