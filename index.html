@@ -61,6 +61,44 @@
       backdrop-filter: blur(6px);
     }
 
+    .github-link {
+      position: fixed;
+      top: 18px;
+      right: 22px;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border: 1px solid rgba(174, 255, 99, 0.2);
+      background: rgba(10, 12, 14, 0.76);
+      border-radius: 12px;
+      box-shadow: 0 8px 22px rgba(0,0,0,0.3);
+      backdrop-filter: blur(6px);
+      color: var(--brand);
+      text-decoration: none;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    }
+
+    .github-link:hover {
+      transform: translateY(-1px);
+      border-color: rgba(174, 255, 99, 0.5);
+      box-shadow: 0 12px 28px rgba(0,0,0,0.4), 0 0 0 3px rgba(174, 255, 99, 0.12);
+    }
+
+    .github-link:focus-visible {
+      outline: none;
+      border-color: rgba(174, 255, 99, 0.8);
+      box-shadow: 0 0 0 3px rgba(174, 255, 99, 0.12);
+    }
+
+    .github-link svg {
+      width: 22px;
+      height: 22px;
+      fill: currentColor;
+    }
+
     .brand-mark {
       width: 110px;
       height: auto;
@@ -566,8 +604,12 @@
     <img class='brand-mark' src='https://i.imgur.com/HvQ6wZ6.png' alt='Allamein Studios logo' />
   </div>
 
+  <a class='github-link' href='https://github.com' target='_blank' rel='noopener noreferrer' aria-label='View on GitHub'>
+    <svg viewBox='0 0 24 24' aria-hidden='true'><path d='M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z'/></svg>
+  </a>
+
   <header class='page-header'>
-    <p class='eyebrow'>Allamein music tutor</p>
+    <p class='eyebrow'>The music tutor</p>
     <h1>Allay Motifs</h1>
     <p class='subtitle'>Generate a short tonal phrase, inspect its contour, and audition the motif at a controlled tempo.</p>
   </header>
@@ -577,7 +619,6 @@
       <div class='controls' aria-label='generator controls'>
         <div class='panel-header'>
           <h2>Controls</h2>
-          <div class='tag'>Live</div>
         </div>
 
         <div class='control-row'>
@@ -646,6 +687,14 @@
           <button id='apply' class='action-btn primary' type='button'>Generate</button>
         </div>
 
+        <div class='control-row'>
+          <label for='audioUpload'>Audio File</label>
+          <div class='control'>
+            <input id='audioUpload' type='file' accept='audio/*' aria-label='Upload audio file for analysis' style='width:100%;padding:8px;background:rgba(11,15,17,0.9);border:1px solid rgba(255,255,255,0.08);border-radius:12px;color:var(--ink);' />
+            <div class='badge' id='uploadStatus' style='min-width:auto;padding:6px 10px;'>No file</div>
+          </div>
+        </div>
+
         <div class='current-selection' aria-live='polite'>
           <span>Current</span>
           <span id='currentSelection'>4 / 4 • C • 120 BPM</span>
@@ -682,6 +731,7 @@
           <div class='transport'>
             <button id='playBtn' class='play' type='button'>Play</button>
             <button id='stopBtn' class='stop' type='button'>Stop</button>
+            <button id='downloadBtn' class='action-btn secondary' type='button' style='min-width:auto;padding:9px 14px;font-size:0.72rem;'>Download</button>
           </div>
         </div>
 
@@ -711,8 +761,10 @@
     variability: document.getElementById("variability"), varVal: document.getElementById("varVal"),
     complexity: document.getElementById("complexity"), compVal: document.getElementById("compVal"),
     density: document.getElementById("density"), densVal: document.getElementById("densVal"),
+    audioUpload: document.getElementById("audioUpload"), uploadStatus: document.getElementById("uploadStatus"),
     apply: document.getElementById("apply"), clear: document.getElementById("clear"),
     play: document.getElementById("playBtn"), stop: document.getElementById("stopBtn"),
+    download: document.getElementById("downloadBtn"),
     output: document.getElementById("outputArea"), status: document.getElementById("statusMessage"),
     summaryKey: document.getElementById("summaryKey"), summaryMeter: document.getElementById("summaryMeter"),
     summaryTempo: document.getElementById("summaryTempo"), summaryLength: document.getElementById("summaryLength"),
@@ -728,6 +780,256 @@
   function updateSelection() { ids.pattern.textContent = formatSelection(); }
   function syncBpm(v) { const safe = clamp(Number.isFinite(v) ? Number(v) : DEFAULTS.bpm, 30, 220); ids.bpmRange.value = String(safe); ids.bpmNumber.value = String(safe); updateSelection(); }
   function refreshBadges() { ids.varVal.textContent = ids.variability.value; ids.compVal.textContent = ids.complexity.value; ids.densVal.textContent = ids.density.value; }
+
+  async function analyzeAudioFile(file) {
+    const arrayBuffer = await file.arrayBuffer();
+    const audioCtx = ensureAudioContext();
+    if (!audioCtx) throw new Error("AudioContext unavailable");
+    const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+    const sampleRate = audioBuffer.sampleRate;
+    const length = audioBuffer.length;
+    const duration = length / sampleRate;
+
+    const channelData = audioBuffer.getChannelData(0);
+    const monoData = new Float32Array(length);
+    for (let i = 0; i < length; i++) {
+      let sum = channelData[i];
+      for (let ch = 1; ch < audioBuffer.numberOfChannels; ch++) {
+        sum += audioBuffer.getChannelData(ch)[i];
+      }
+      monoData[i] = sum / audioBuffer.numberOfChannels;
+    }
+
+    const bpm = detectBPM(monoData, sampleRate);
+    const key = detectKey(monoData, sampleRate);
+    const timeSignature = detectTimeSignature(monoData, sampleRate, bpm);
+    const { variability, complexity, density } = analyzeMusicalFeatures(monoData, sampleRate, bpm);
+
+    return { bpm, key, timeSignature, variability, complexity, density, duration };
+  }
+
+  function detectBPM(signal, sampleRate) {
+    const frameSize = 1024;
+    const hopSize = 512;
+    const numFrames = Math.floor((signal.length - frameSize) / hopSize) + 1;
+    const energy = new Float32Array(numFrames);
+
+    for (let i = 0; i < numFrames; i++) {
+      let sum = 0;
+      const start = i * hopSize;
+      for (let j = 0; j < frameSize; j++) {
+        const val = signal[start + j];
+        sum += val * val;
+      }
+      energy[i] = sum / frameSize;
+    }
+
+    const minBPM = 60, maxBPM = 200;
+    const minLag = Math.floor(60 * sampleRate / (maxBPM * hopSize));
+    const maxLag = Math.floor(60 * sampleRate / (minBPM * hopSize));
+
+    let bestCorr = -1, bestLag = minLag;
+    for (let lag = minLag; lag <= maxLag && lag < numFrames; lag++) {
+      let corr = 0, norm1 = 0, norm2 = 0;
+      for (let i = 0; i < numFrames - lag; i++) {
+        corr += energy[i] * energy[i + lag];
+        norm1 += energy[i] * energy[i];
+        norm2 += energy[i + lag] * energy[i + lag];
+      }
+      if (norm1 > 0 && norm2 > 0) {
+        corr /= Math.sqrt(norm1 * norm2);
+        if (corr > bestCorr) { bestCorr = corr; bestLag = lag; }
+      }
+    }
+
+    const bpm = Math.round(60 * sampleRate / (bestLag * hopSize));
+    return clamp(bpm, 60, 200);
+  }
+
+  function detectKey(signal, sampleRate) {
+    const frameSize = 4096;
+    const hopSize = 2048;
+    const numFrames = Math.floor((signal.length - frameSize) / hopSize) + 1;
+    const chroma = new Array(12).fill(0);
+
+    for (let i = 0; i < numFrames; i++) {
+      const start = i * hopSize;
+      const window = new Float32Array(frameSize);
+      for (let j = 0; j < frameSize; j++) {
+        window[j] = signal[start + j] * 0.5 * (1 - Math.cos(2 * Math.PI * j / (frameSize - 1)));
+      }
+      const spectrum = rfft(window);
+      const magnitudes = spectrum.map(c => Math.sqrt(c.re * c.re + c.im * c.im));
+      const freqs = magnitudes.map((_, k) => k * sampleRate / frameSize);
+
+      for (let k = 0; k < magnitudes.length; k++) {
+        const freq = freqs[k];
+        if (freq < 80 || freq > 1000) continue;
+        const midi = 69 + 12 * Math.log2(freq / 440);
+        const pitchClass = Math.round(midi) % 12;
+        if (pitchClass >= 0 && pitchClass < 12) {
+          chroma[pitchClass] += magnitudes[k];
+        }
+      }
+    }
+
+    const majorProfile = [6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88];
+    const minorProfile = [6.33, 2.68, 3.52, 5.38, 2.60, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17];
+    const keyNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+    const availableKeys = Object.keys(KEY_SCALE_MAP);
+
+    let bestKey = "C", bestScore = -1;
+    for (let root = 0; root < 12; root++) {
+      let majorScore = 0, minorScore = 0;
+      for (let i = 0; i < 12; i++) {
+        majorScore += chroma[(root + i) % 12] * majorProfile[i];
+        minorScore += chroma[(root + i) % 12] * minorProfile[i];
+      }
+      const majorKey = keyNames[root];
+      const minorKey = keyNames[root] + "m";
+      if (availableKeys.includes(majorKey) && majorScore > bestScore) {
+        bestScore = majorScore; bestKey = majorKey;
+      }
+      if (availableKeys.includes(minorKey.replace("m", "")) && minorScore > bestScore) {
+        bestScore = minorScore; bestKey = minorKey.replace("m", "");
+      }
+    }
+    return bestKey;
+  }
+
+  function rfft(input) {
+    const N = input.length;
+    const output = new Array(N / 2 + 1);
+    for (let k = 0; k <= N / 2; k++) {
+      let re = 0, im = 0;
+      for (let n = 0; n < N; n++) {
+        const angle = -2 * Math.PI * k * n / N;
+        re += input[n] * Math.cos(angle);
+        im += input[n] * Math.sin(angle);
+      }
+      output[k] = { re, im };
+    }
+    return output;
+  }
+
+  function detectTimeSignature(signal, sampleRate, bpm) {
+    const frameSize = 1024;
+    const hopSize = 512;
+    const numFrames = Math.floor((signal.length - frameSize) / hopSize) + 1;
+    const energy = new Float32Array(numFrames);
+
+    for (let i = 0; i < numFrames; i++) {
+      let sum = 0;
+      const start = i * hopSize;
+      for (let j = 0; j < frameSize; j++) {
+        const val = signal[start + j];
+        sum += val * val;
+      }
+      energy[i] = sum / frameSize;
+    }
+
+    const beatInterval = Math.round(60 * sampleRate / (bpm * hopSize));
+    const measures = [2, 3, 4, 6];
+    let bestMeter = 4, bestScore = -1;
+
+    for (const meter of measures) {
+      let score = 0;
+      const measureLength = beatInterval * meter;
+      for (let i = 0; i < numFrames - measureLength; i += measureLength) {
+        let downbeatEnergy = energy[i];
+        let otherEnergy = 0;
+        for (let b = 1; b < meter; b++) {
+          otherEnergy += energy[i + b * beatInterval];
+        }
+        if (otherEnergy > 0) score += downbeatEnergy / (otherEnergy / (meter - 1));
+      }
+      if (score > bestScore) { bestScore = score; bestMeter = meter; }
+    }
+    return `${bestMeter}/4`;
+  }
+
+  function analyzeMusicalFeatures(signal, sampleRate, bpm) {
+    const frameSize = 2048;
+    const hopSize = 1024;
+    const numFrames = Math.floor((signal.length - frameSize) / hopSize) + 1;
+    const spectralCentroids = [];
+    const spectralFlux = [];
+    let prevMag = null;
+
+    for (let i = 0; i < numFrames; i++) {
+      const start = i * hopSize;
+      const window = new Float32Array(frameSize);
+      for (let j = 0; j < frameSize; j++) {
+        window[j] = signal[start + j] * 0.5 * (1 - Math.cos(2 * Math.PI * j / (frameSize - 1)));
+      }
+      const spectrum = rfft(window);
+      const magnitudes = spectrum.map(c => Math.sqrt(c.re * c.re + c.im * c.im));
+      const freqs = magnitudes.map((_, k) => k * sampleRate / frameSize);
+
+      let weightedSum = 0, magSum = 0;
+      for (let k = 0; k < magnitudes.length; k++) {
+        weightedSum += freqs[k] * magnitudes[k];
+        magSum += magnitudes[k];
+      }
+      spectralCentroids.push(magSum > 0 ? weightedSum / magSum : 0);
+
+      if (prevMag) {
+        let flux = 0;
+        for (let k = 0; k < magnitudes.length; k++) {
+          const diff = magnitudes[k] - prevMag[k];
+          if (diff > 0) flux += diff;
+        }
+        spectralFlux.push(flux);
+      }
+      prevMag = magnitudes;
+    }
+
+    const centroidMean = spectralCentroids.reduce((a, b) => a + b, 0) / spectralCentroids.length;
+    const centroidVar = spectralCentroids.reduce((a, b) => a + (b - centroidMean) ** 2, 0) / spectralCentroids.length;
+    const fluxMean = spectralFlux.reduce((a, b) => a + b, 0) / (spectralFlux.length || 1);
+    const fluxVar = spectralFlux.reduce((a, b) => a + (b - fluxMean) ** 2, 0) / (spectralFlux.length || 1);
+
+    const onsetThreshold = fluxMean + 1.5 * Math.sqrt(fluxVar);
+    let onsetCount = 0;
+    for (const f of spectralFlux) if (f > onsetThreshold) onsetCount++;
+    const onsetRate = onsetCount / (numFrames * hopSize / sampleRate);
+
+    const variability = clamp(Math.round(50 + (centroidVar / 1e6) * 100 + (fluxVar / 1e3) * 50), 0, 100);
+    const complexity = clamp(Math.round(30 + (centroidMean / 5000) * 40 + (onsetRate / 10) * 30), 0, 100);
+    const density = clamp(Math.round(20 + onsetRate * 2 + (fluxMean / 100) * 30), 0, 100);
+
+    return { variability, complexity, density };
+  }
+
+  function applyAnalysisResults(results) {
+    ids.bpmRange.value = String(results.bpm);
+    ids.bpmNumber.value = String(results.bpm);
+    ids.timeSig.value = results.timeSignature;
+    ids.keySig.value = results.key;
+    ids.variability.value = String(results.variability);
+    ids.complexity.value = String(results.complexity);
+    ids.density.value = String(results.density);
+    refreshBadges();
+    updateSelection();
+    setStatus(`Analyzed: ${results.bpm} BPM • ${results.timeSignature} • ${keyDisplay(results.key)} • Var: ${results.variability} • Comp: ${results.complexity} • Dense: ${results.density}`);
+    generateMotif();
+  }
+
+  async function handleAudioUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    ids.uploadStatus.textContent = "Analyzing...";
+    setStatus("Analyzing audio file...");
+    try {
+      const results = await analyzeAudioFile(file);
+      ids.uploadStatus.textContent = file.name;
+      applyAnalysisResults(results);
+    } catch (err) {
+      ids.uploadStatus.textContent = "Error";
+      setStatus(`Analysis failed: ${err.message}`);
+      console.error(err);
+    }
+  }
 
   function makeMotif(cfg) {
     const scale = KEY_SCALE_MAP[cfg.keySignature] || KEY_SCALE_MAP.C;
@@ -867,6 +1169,81 @@
     setStatus(`Playing ${state.motif.keyDisplay} motif at ${state.motif.bpm} BPM.`);
   }
 
+  async function downloadMotif() {
+    if (!state.motif) { setStatus("Generate a motif before downloading."); return; }
+    const ctx = ensureAudioContext(); if (!ctx) { setStatus("Audio context unavailable."); return; }
+    setStatus("Rendering audio for download...");
+
+    const beat = 60 / state.motif.bpm;
+    const totalDuration = state.motif.phraseDuration * beat + 0.5;
+    const sampleRate = ctx.sampleRate;
+    const length = Math.ceil(totalDuration * sampleRate);
+    const offlineCtx = new OfflineAudioContext(1, length, sampleRate);
+
+    state.motif.notes.forEach((note) => {
+      const noteStart = note.start * beat;
+      const noteEnd = noteStart + Math.max(note.duration, 0.2) * beat;
+      const osc = offlineCtx.createOscillator();
+      const gain = offlineCtx.createGain();
+      osc.type = note.grace ? "triangle" : "sine";
+      osc.frequency.value = midiToFreq(note.midi);
+      gain.gain.setValueAtTime(0.0001, noteStart);
+      gain.gain.exponentialRampToValueAtTime(0.15, noteStart + 0.03);
+      gain.gain.exponentialRampToValueAtTime(0.0001, noteEnd);
+      osc.connect(gain);
+      gain.connect(offlineCtx.destination);
+      osc.start(noteStart);
+      osc.stop(noteEnd + 0.04);
+    });
+
+    const renderedBuffer = await offlineCtx.startRendering();
+    const wavBlob = audioBufferToWav(renderedBuffer);
+    const url = URL.createObjectURL(wavBlob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `allay-motif-${state.motif.keyDisplay}-${state.motif.bpm}bpm-${Date.now()}.wav`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    setStatus("Downloaded motif as WAV.");
+  }
+
+  function audioBufferToWav(buffer) {
+    const numChannels = buffer.numberOfChannels;
+    const sampleRate = buffer.sampleRate;
+    const length = buffer.length * numChannels * 2 + 44;
+    const arrayBuffer = new ArrayBuffer(length);
+    const view = new DataView(arrayBuffer);
+    const channels = [];
+    for (let i = 0; i < numChannels; i++) channels.push(buffer.getChannelData(i));
+
+    let offset = 0;
+    const writeString = (str) => { for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i)); offset += str.length; };
+    writeString("RIFF");
+    view.setUint32(offset, length - 8, true); offset += 4;
+    writeString("WAVE");
+    writeString("fmt ");
+    view.setUint32(offset, 16, true); offset += 4;
+    view.setUint16(offset, 1, true); offset += 2;
+    view.setUint16(offset, numChannels, true); offset += 2;
+    view.setUint32(offset, sampleRate, true); offset += 4;
+    view.setUint32(offset, sampleRate * numChannels * 2, true); offset += 4;
+    view.setUint16(offset, numChannels * 2, true); offset += 2;
+    view.setUint16(offset, 16, true); offset += 2;
+    writeString("data");
+    view.setUint32(offset, length - 44, true); offset += 4;
+
+    for (let i = 0; i < buffer.length; i++) {
+      for (let ch = 0; ch < numChannels; ch++) {
+        const sample = Math.max(-1, Math.min(1, channels[ch][i]));
+        view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true);
+        offset += 2;
+      }
+    }
+    return new Blob([arrayBuffer], { type: "audio/wav" });
+  }
+
   function clearAll() {
     ids.bpmRange.value = String(DEFAULTS.bpm); ids.bpmNumber.value = String(DEFAULTS.bpm); ids.timeSig.value = DEFAULTS.timeSignature; ids.keySig.value = DEFAULTS.keySignature; ids.variability.value = String(DEFAULTS.variability); ids.complexity.value = String(DEFAULTS.complexity); ids.density.value = String(DEFAULTS.density); refreshBadges(); updateSelection(); state.motif = null; stopPlayback(true); renderEmpty(); updateSummary(null); setStatus("Cleared. Ready to generate."); window.dispatchEvent(new CustomEvent("controlsCleared"));
   }
@@ -881,6 +1258,8 @@
     ids.clear.addEventListener("click", clearAll);
     ids.play.addEventListener("click", playMotif);
     ids.stop.addEventListener("click", () => stopPlayback(false));
+    ids.download.addEventListener("click", downloadMotif);
+    ids.audioUpload.addEventListener("change", handleAudioUpload);
   }
 
   window.AllameinFrontend = {
