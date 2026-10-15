@@ -37,3 +37,7 @@ You can copy this link and paste it into your web browser to try Allay Motifs wi
 ```
 https://y3chnx.github.io/Allay
 ```
+
+# Screenshots
+<img src="1.png">
+<img src="2.png">
