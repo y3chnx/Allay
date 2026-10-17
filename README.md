@@ -32,12 +32,6 @@ Go to the repository that you just cloned and type this:
 npx serve .
 ```
 
-# Website URL 
-You can copy this link and paste it into your web browser to try Allay Motifs without downloading anything: 
-```
-https://y3chnx.github.io/Allay
-```
-
 # Screenshots
 <img src="1.png">
 <img src="2.png">
